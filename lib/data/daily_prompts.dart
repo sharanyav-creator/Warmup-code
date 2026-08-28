@@ -1,3 +1,5 @@
+import 'dart:math';
+
 const List<String> dailyPrompts = [
   "Describe a small win you had this week.",
   "Explain your job to someone who's never heard of it.",
@@ -22,3 +24,8 @@ String promptForDate(DateTime date) {
   final index = dayIndex % dailyPrompts.length;
   return dailyPrompts[index < 0 ? index + dailyPrompts.length : index];
 }
+
+final Random _promptRandom = Random();
+
+/// A random conversational prompt for "impromptu" practice sessions.
+String randomPrompt() => dailyPrompts[_promptRandom.nextInt(dailyPrompts.length)];
