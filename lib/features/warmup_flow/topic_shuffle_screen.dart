@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/design_tokens.dart';
+import '../mascot/warm_mascot.dart';
 import 'prep_start_screen.dart';
 import 'warmup_flow_context.dart';
 
@@ -25,7 +25,7 @@ class _TopicShuffleScreenState extends State<TopicShuffleScreen> {
   }
 
   Future<void> _proceed() async {
-    await Future.delayed(const Duration(milliseconds: 1600));
+    await Future.delayed(const Duration(milliseconds: 2000));
     if (!mounted) return;
     final prompt = widget.promptPool[Random().nextInt(widget.promptPool.length)];
     final flowContext = WarmupFlowContext(
@@ -54,7 +54,7 @@ class _TopicShuffleScreenState extends State<TopicShuffleScreen> {
               style: OnboardingText.headline(color: Colors.black, fontSize: 20),
             ),
             const Spacer(flex: 2),
-            SvgPicture.asset('assets/onboarding/quote_bubble.svg', width: 100, height: 78),
+            const WarmMascot(mode: MascotMode.shuffling, width: 132),
             const Spacer(flex: 3),
             Text(
               'This will take a few seconds...',

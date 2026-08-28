@@ -9,6 +9,7 @@ import '../../data/models/session_record.dart';
 import '../../data/repositories/session_repository.dart';
 import '../../data/weekly_stats.dart';
 import '../goals/frameworks_screen.dart';
+import '../mascot/warm_mascot.dart';
 import '../warmup_flow/topic_shuffle_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -124,7 +125,7 @@ class _ImpromptuCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            SvgPicture.asset('assets/onboarding/quote_bubble.svg', width: 48, height: 38),
+            const WarmMascot(width: 48, interactive: false),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
