@@ -5,7 +5,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/constants.dart';
 import '../../core/design_tokens.dart';
+import '../../data/prep_preferences.dart';
 import 'prep_countdown_screen.dart';
+import 'speech_recording_screen.dart';
 import 'warmup_flow_context.dart';
 
 class PrepStartScreen extends StatefulWidget {
@@ -18,12 +20,26 @@ class PrepStartScreen extends StatefulWidget {
 }
 
 class _PrepStartScreenState extends State<PrepStartScreen> {
+  final _prepPreferences = PrepPreferences();
   late WarmupFlowContext _flowContext;
+  bool _skipPrep = false;
 
   @override
   void initState() {
     super.initState();
     _flowContext = widget.flowContext;
+    _loadSkipPrep();
+  }
+
+  Future<void> _loadSkipPrep() async {
+    final skip = await _prepPreferences.getSkipPrep();
+    if (!mounted) return;
+    setState(() => _skipPrep = skip);
+  }
+
+  void _onSkipPrepChanged(bool value) {
+    setState(() => _skipPrep = value);
+    _prepPreferences.setSkipPrep(value);
   }
 
   void _shuffle() {
@@ -36,10 +52,16 @@ class _PrepStartScreenState extends State<PrepStartScreen> {
     setState(() => _flowContext = _flowContext.withPrompt(next));
   }
 
-  void _startPrep() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => PrepCountdownScreen(flowContext: _flowContext)),
-    );
+  void _continue() {
+    if (_skipPrep) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => SpeechRecordingScreen(flowContext: _flowContext)),
+      );
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => PrepCountdownScreen(flowContext: _flowContext)),
+      );
+    }
   }
 
   @override
@@ -49,79 +71,101 @@ class _PrepStartScreenState extends State<PrepStartScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  InkWell(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: const Icon(Icons.arrow_back, size: 24, color: Colors.black),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(_flowContext.headerLabel, style: OnboardingText.eyebrow()),
-                ],
-              ),
-              const SizedBox(height: 40),
-              Text(
-                '"${_flowContext.promptText}"',
-                textAlign: TextAlign.center,
-                style: OnboardingText.headline(color: Colors.black, fontSize: 20),
-              ),
-              const Spacer(flex: 3),
-              Text(
-                '00:${targetSessionLength.inSeconds.toString().padLeft(2, '0')}',
-                style: OnboardingText.headline(color: OnboardingColors.burgundy, fontSize: 36),
-              ),
-              const Spacer(flex: 5),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: OnboardingColors.orange,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    elevation: 0,
-                  ),
-                  onPressed: _startPrep,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset('assets/main/start_prep_icon.svg', width: 20, height: 20),
-                      const SizedBox(width: 12),
-                      Text('START PREP', style: OnboardingText.buttonLabel(color: Colors.white)),
-                    ],
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    InkWell(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: const Icon(Icons.arrow_back, size: 24, color: Colors.black),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(_flowContext.headerLabel, textAlign: TextAlign.center, style: OnboardingText.eyebrow()),
+                  ],
+                ),
+                const SizedBox(height: 40),
+                Text(
+                  '"${_flowContext.promptText}"',
+                  textAlign: TextAlign.center,
+                  style: OnboardingText.headline(color: Colors.black, fontSize: 20),
+                ),
+                const Spacer(flex: 3),
+                Text(
+                  '00:${targetSessionLength.inSeconds.toString().padLeft(2, '0')}',
+                  textAlign: TextAlign.center,
+                  style: OnboardingText.headline(color: OnboardingColors.burgundy, fontSize: 36),
+                ),
+                const Spacer(flex: 3),
+                Text(
+                  'You can skip PREP if you feel confident!',
+                  textAlign: TextAlign.center,
+                  style: OnboardingText.body(color: OnboardingColors.creamSubtext).copyWith(fontSize: 12),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      'SKIP PREP',
+                      style: OnboardingText.buttonLabel(color: OnboardingColors.creamSubtext).copyWith(fontSize: 12),
+                    ),
+                    Switch(
+                      value: _skipPrep,
+                      onChanged: _onSkipPrepChanged,
+                      activeThumbColor: Colors.white,
+                      activeTrackColor: OnboardingColors.burgundy,
+                      inactiveThumbColor: Colors.white,
+                      inactiveTrackColor: const Color(0xFFD9D9D9),
+                      trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+                    ),
+                  ],
+                ),
+                const Spacer(flex: 2),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: OnboardingColors.orange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      elevation: 0,
+                    ),
+                    onPressed: _continue,
+                    child: Text('Continue', style: OnboardingText.buttonLabel(color: Colors.white)),
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: OnboardingColors.creamSubtext,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    elevation: 0,
-                  ),
-                  onPressed: _shuffle,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset('assets/onboarding/shuffle_icon.svg', width: 20, height: 20),
-                      const SizedBox(width: 10),
-                      Text('Shuffle Topic', style: OnboardingText.buttonLabel(color: OnboardingColors.creamSubtext)),
-                    ],
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: OnboardingColors.creamSubtext,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      elevation: 0,
+                    ),
+                    onPressed: _shuffle,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset('assets/onboarding/shuffle_icon.svg', width: 20, height: 20),
+                        const SizedBox(width: 10),
+                        Text('Shuffle Topic', style: OnboardingText.buttonLabel(color: OnboardingColors.creamSubtext)),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-            ],
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
       ),
