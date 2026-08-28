@@ -35,7 +35,7 @@ const Duration longPauseThreshold = Duration(seconds: 2);
 const Duration targetSessionLength = Duration(seconds: 60);
 
 /// "Think time" before a warmup recording begins.
-const Duration prepSessionLength = Duration(seconds: 15);
+const Duration prepSessionLength = Duration(seconds: 60);
 
 /// A word must repeat at least this many times in one session to be a "clutch word".
 const int clutchWordMinCount = 3;
