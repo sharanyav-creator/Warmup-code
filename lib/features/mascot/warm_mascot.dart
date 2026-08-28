@@ -37,11 +37,16 @@ class WarmMascot extends StatefulWidget {
   /// whose tap already does something else) so taps aren't intercepted.
   final bool interactive;
 
+  /// Whether Warm blinks/animates on its own while idle. Set to false to
+  /// show a single frozen frame (e.g. a small icon inside a busy card).
+  final bool animate;
+
   const WarmMascot({
     super.key,
     this.mode = MascotMode.idle,
     this.width = 132,
     this.interactive = true,
+    this.animate = true,
   });
 
   /// Total time the shuffling sequence takes for one full pass, for callers
@@ -110,7 +115,7 @@ class _WarmMascotState extends State<WarmMascot> with SingleTickerProviderStateM
       _scheduleNextShuffleStep();
     } else {
       setState(() => _frame = 'warm_idle.svg');
-      _scheduleBlink();
+      if (widget.animate) _scheduleBlink();
     }
   }
 

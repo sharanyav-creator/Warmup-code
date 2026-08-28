@@ -125,7 +125,7 @@ class _ImpromptuCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const WarmMascot(width: 48, interactive: false),
+            const WarmMascot(width: 81, interactive: false, animate: false),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
