@@ -8,6 +8,7 @@ import '../../data/daily_prompts.dart';
 import '../../data/models/session_record.dart';
 import '../../data/repositories/session_repository.dart';
 import '../../data/weekly_stats.dart';
+import '../goals/frameworks_screen.dart';
 import '../record/record_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -85,7 +86,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     iconAsset: 'assets/main/home_frameworks_icon.svg',
                     title: 'Read Frameworks',
                     subtitle: 'Know ways you can structure your speech',
-                    onTap: () => widget.onNavigateToTab?.call(2),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const FrameworksScreen()),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   _ActionCard(
