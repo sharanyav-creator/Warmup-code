@@ -25,6 +25,12 @@ class OnboardingColors {
   static const Color weekBlockEmpty = Color(0xFFECECEC);
   static const Color textDark1f = Color(0xFF1F1F1F);
   static const Color textGray444 = Color(0xFF444444);
+
+  // Calendar day-quality buckets
+  static const Color calendarNoPractice = Color(0xFFEDE7DF);
+  static const Color calendarPracticed = Color(0xFFF47E38);
+  static const Color calendarSolid = Color(0xFFE8967A);
+  static const Color calendarStrong = Color(0xFFB5301F);
 }
 
 class OnboardingText {

@@ -15,6 +15,7 @@ class AnalysisResult {
   final List<ClutchWord> clutchWords;
   final int longPauseCount;
   final int score;
+  final int fumbleCount;
 
   const AnalysisResult({
     required this.transcript,
@@ -26,6 +27,7 @@ class AnalysisResult {
     required this.clutchWords,
     required this.longPauseCount,
     required this.score,
+    required this.fumbleCount,
   });
 
   double get fillerRatePerMinute =>

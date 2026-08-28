@@ -112,6 +112,8 @@ class _BaselineRecordingScreenState extends State<BaselineRecordingScreen> {
       clutchWordCount: result.clutchWords.length,
       longPauseCount: result.longPauseCount,
       score: result.score,
+      fumbleCount: result.fumbleCount,
+      trackLabel: 'BASELINE',
     );
     await sessionRepository.insert(record);
 

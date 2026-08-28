@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _startImpromptu() async {
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => RecordScreen(promptText: randomPrompt())),
+      MaterialPageRoute(builder: (_) => RecordScreen(promptText: randomPrompt(), trackLabel: 'IMPROMPTU')),
     );
     _load();
   }

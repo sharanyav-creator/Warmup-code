@@ -17,7 +17,7 @@ class AppDatabase {
     final path = join(dbPath, 'warmup.db');
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE sessions (
@@ -32,9 +32,17 @@ class AppDatabase {
             fillerBreakdown TEXT NOT NULL,
             clutchWordCount INTEGER NOT NULL,
             longPauseCount INTEGER NOT NULL,
-            score INTEGER NOT NULL
+            score INTEGER NOT NULL,
+            fumbleCount INTEGER NOT NULL DEFAULT 0,
+            trackLabel TEXT
           )
         ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('ALTER TABLE sessions ADD COLUMN fumbleCount INTEGER NOT NULL DEFAULT 0');
+          await db.execute('ALTER TABLE sessions ADD COLUMN trackLabel TEXT');
+        }
       },
     );
   }

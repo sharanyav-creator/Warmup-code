@@ -1,67 +1,56 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/design_tokens.dart';
+import '../../data/tracks_catalog.dart';
+import '../../data/tracks_repository.dart';
 import '../record/record_screen.dart';
+import 'all_tracks_screen.dart';
 
-class _TrackItem {
-  final String eyebrow;
-  final String title;
-  final String subtitle;
-  final bool primary;
-  final List<String> prompts;
-
-  const _TrackItem({
-    required this.eyebrow,
-    required this.title,
-    required this.subtitle,
-    required this.prompts,
-    this.primary = false,
-  });
-}
-
-const List<_TrackItem> _yourTracks = [
-  _TrackItem(
-    eyebrow: 'PRIMARY TRACK',
-    title: 'Interview Track',
-    subtitle: 'Behavioral and situational questions',
-    primary: true,
-    prompts: [
-      'Tell me about a time you disagreed with a teammate.',
-      'Describe a project that didn\'t go as planned.',
-      'Walk me through a decision you regret.',
-    ],
-  ),
-  _TrackItem(
-    eyebrow: 'RANDOM • IMPROMPTU',
-    title: 'Everyday conversation',
-    subtitle: 'Small talk that feels easy',
-    prompts: [
-      'What did you do this weekend?',
-      "What's a show you've been meaning to watch?",
-      'Any good food recommendations lately?',
-    ],
-  ),
-  _TrackItem(
-    eyebrow: 'TECHNIQUE BASED',
-    title: 'Storytelling',
-    subtitle: 'Turn moments into memorable stories',
-    prompts: [
-      'Tell a story about a time you got lost.',
-      'Describe the best surprise you ever had.',
-      'Talk about a moment that changed your perspective.',
-    ],
-  ),
-];
-
-class GoalsScreen extends StatelessWidget {
+class GoalsScreen extends StatefulWidget {
   const GoalsScreen({super.key});
 
-  void _startTrackPractice(BuildContext context, _TrackItem track) {
-    final prompt = track.prompts[DateTime.now().millisecondsSinceEpoch % track.prompts.length];
+  @override
+  State<GoalsScreen> createState() => _GoalsScreenState();
+}
+
+class _GoalsScreenState extends State<GoalsScreen> {
+  final _repository = TracksRepository();
+  final _random = Random();
+  List<TrackDef> _yourTracks = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final ids = await _repository.getActiveTrackIds();
+    if (!mounted) return;
+    setState(() {
+      _yourTracks = ids.map(trackById).toList();
+      _loading = false;
+    });
+  }
+
+  void _startTrackPractice(TrackDef track) {
+    final prompt = track.prompts[_random.nextInt(track.prompts.length)];
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => RecordScreen(promptText: prompt)),
+      MaterialPageRoute(
+        builder: (_) => RecordScreen(promptText: prompt, trackLabel: track.trackLabel),
+      ),
     );
+  }
+
+  Future<void> _exploreMoreTracks() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const AllTracksScreen()),
+    );
+    _load();
   }
 
   @override
@@ -79,28 +68,30 @@ class GoalsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                children: [
-                  for (final track in _yourTracks)
-                    _TrackCard(track: track, onPlay: () => _startTrackPractice(context, track)),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: OnboardingColors.orange,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        elevation: 0,
-                      ),
-                      onPressed: () {},
-                      child: Text('Explore more Tracks', style: OnboardingText.buttonLabel(color: Colors.white)),
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      children: [
+                        for (final track in _yourTracks)
+                          _TrackCard(track: track, onPlay: () => _startTrackPractice(track)),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: OnboardingColors.orange,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              elevation: 0,
+                            ),
+                            onPressed: _exploreMoreTracks,
+                            child: Text('Explore more Tracks', style: OnboardingText.buttonLabel(color: Colors.white)),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
-              ),
             ),
           ],
         ),
@@ -110,7 +101,7 @@ class GoalsScreen extends StatelessWidget {
 }
 
 class _TrackCard extends StatelessWidget {
-  final _TrackItem track;
+  final TrackDef track;
   final VoidCallback onPlay;
 
   const _TrackCard({required this.track, required this.onPlay});
@@ -123,9 +114,7 @@ class _TrackCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: track.primary
-            ? const Border(left: BorderSide(color: OnboardingColors.burgundy, width: 6))
-            : null,
+        border: const Border(left: BorderSide(color: OnboardingColors.burgundy, width: 6)),
       ),
       child: Row(
         children: [

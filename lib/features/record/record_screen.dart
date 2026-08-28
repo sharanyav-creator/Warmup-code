@@ -14,8 +14,9 @@ import 'analysis_engine.dart';
 
 class RecordScreen extends StatefulWidget {
   final String promptText;
+  final String? trackLabel;
 
-  const RecordScreen({super.key, required this.promptText});
+  const RecordScreen({super.key, required this.promptText, this.trackLabel});
 
   @override
   State<RecordScreen> createState() => _RecordScreenState();
@@ -116,6 +117,8 @@ class _RecordScreenState extends State<RecordScreen> {
       clutchWordCount: result.clutchWords.length,
       longPauseCount: result.longPauseCount,
       score: result.score,
+      fumbleCount: result.fumbleCount,
+      trackLabel: widget.trackLabel,
     );
     await sessionRepository.insert(record);
 

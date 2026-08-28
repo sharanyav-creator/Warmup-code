@@ -14,6 +14,11 @@ class SessionRecord {
   final int clutchWordCount;
   final int longPauseCount;
   final int score;
+  final int fumbleCount;
+
+  /// Short uppercase label for where this session came from, e.g. "INTERVIEWS",
+  /// "IMPROMPTU", "BASELINE". Null for sessions with no specific track.
+  final String? trackLabel;
 
   const SessionRecord({
     this.id,
@@ -28,6 +33,8 @@ class SessionRecord {
     required this.clutchWordCount,
     required this.longPauseCount,
     required this.score,
+    this.fumbleCount = 0,
+    this.trackLabel,
   });
 
   Map<String, dynamic> toMap() {
@@ -44,6 +51,8 @@ class SessionRecord {
       'clutchWordCount': clutchWordCount,
       'longPauseCount': longPauseCount,
       'score': score,
+      'fumbleCount': fumbleCount,
+      'trackLabel': trackLabel,
     };
   }
 
@@ -63,6 +72,8 @@ class SessionRecord {
       clutchWordCount: map['clutchWordCount'] as int,
       longPauseCount: map['longPauseCount'] as int,
       score: map['score'] as int,
+      fumbleCount: (map['fumbleCount'] as int?) ?? 0,
+      trackLabel: map['trackLabel'] as String?,
     );
   }
 }

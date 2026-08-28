@@ -7,6 +7,7 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../core/design_tokens.dart';
 import '../../data/models/session_record.dart';
 import '../../data/repositories/session_repository.dart';
+import 'day_insights_screen.dart';
 
 enum _ProgressTab { growth, trends, calendar, history }
 
@@ -361,16 +362,27 @@ class _CalendarTab extends StatelessWidget {
 
   const _CalendarTab({required this.sessions, required this.focusedDay, required this.onPageChanged});
 
+  Color _colorForScore(int? score) {
+    if (score == null) return OnboardingColors.calendarNoPractice;
+    if (score >= 75) return OnboardingColors.calendarStrong;
+    if (score >= 50) return OnboardingColors.calendarSolid;
+    return OnboardingColors.calendarPracticed;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final practiceDays = sessions
-        .map((s) => DateTime(s.createdAt.year, s.createdAt.month, s.createdAt.day))
-        .toSet();
+    final bestScoreByDay = <DateTime, int>{};
+    for (final s in sessions) {
+      final key = DateTime(s.createdAt.year, s.createdAt.month, s.createdAt.day);
+      final existing = bestScoreByDay[key];
+      if (existing == null || s.score > existing) bestScoreByDay[key] = s.score;
+    }
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       children: [
         Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
           child: TableCalendar(
             firstDay: DateTime.now().subtract(const Duration(days: 365)),
@@ -380,26 +392,60 @@ class _CalendarTab extends StatelessWidget {
             calendarFormat: CalendarFormat.month,
             headerStyle: const HeaderStyle(formatButtonVisible: false),
             selectedDayPredicate: (_) => false,
+            onDaySelected: (selectedDay, _) {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => DayInsightsScreen(initialDay: selectedDay)),
+              );
+            },
             calendarBuilders: CalendarBuilders(
               defaultBuilder: (context, day, _) {
                 final key = DateTime(day.year, day.month, day.day);
-                if (practiceDays.contains(key)) {
-                  return Center(
-                    child: Container(
-                      width: 34,
-                      height: 34,
-                      decoration: const BoxDecoration(color: OnboardingColors.burgundy, shape: BoxShape.circle),
-                      alignment: Alignment.center,
-                      child: Text('${day.day}', style: const TextStyle(color: Colors.white)),
+                final score = bestScoreByDay[key];
+                return Center(
+                  child: Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(color: _colorForScore(score), borderRadius: BorderRadius.circular(8)),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '${day.day}',
+                      style: TextStyle(color: score == null ? OnboardingColors.creamSubtext : Colors.white),
                     ),
-                  );
-                }
-                return null;
+                  ),
+                );
               },
             ),
           ),
         ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          children: [
+            _legendDot('No practice', OnboardingColors.calendarNoPractice),
+            _legendDot('Practiced', OnboardingColors.calendarPracticed),
+            _legendDot('Solid session', OnboardingColors.calendarSolid),
+            _legendDot('Strong session', OnboardingColors.calendarStrong),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Tap a day to dive deeper and take an individual look.',
+          textAlign: TextAlign.center,
+          style: OnboardingText.body(color: OnboardingColors.creamSubtext).copyWith(fontSize: 10),
+        ),
         const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _legendDot(String label, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(width: 14, height: 14, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4))),
+        const SizedBox(width: 4),
+        Text(label, style: OnboardingText.buttonLabel(color: OnboardingColors.eyebrowGray).copyWith(fontSize: 8)),
       ],
     );
   }

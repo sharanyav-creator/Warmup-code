@@ -74,11 +74,18 @@ AnalysisResult analyzeSession({
     if (gap >= longPauseThreshold) longPauseCount++;
   }
 
+  // Stutters/false starts: the same word repeated back-to-back, e.g. "I, I, I mean".
+  var fumbleCount = 0;
+  for (var i = 1; i < tokens.length; i++) {
+    if (tokens[i] == tokens[i - 1]) fumbleCount++;
+  }
+
   final score = _computeScore(
     wordCount: wordCount,
     fillerCount: fillerCount,
     clutchWordCount: clutchWords.length,
     longPauseCount: longPauseCount,
+    fumbleCount: fumbleCount,
     wordsPerMinute: wordsPerMinute,
   );
 
@@ -92,6 +99,7 @@ AnalysisResult analyzeSession({
     clutchWords: clutchWords,
     longPauseCount: longPauseCount,
     score: score,
+    fumbleCount: fumbleCount,
   );
 }
 
@@ -100,6 +108,7 @@ int _computeScore({
   required int fillerCount,
   required int clutchWordCount,
   required int longPauseCount,
+  required int fumbleCount,
   required double wordsPerMinute,
 }) {
   if (wordCount == 0) return 0;
@@ -112,6 +121,8 @@ int _computeScore({
   score -= (clutchWordCount * 5).clamp(0, 20);
 
   score -= (longPauseCount * 4).clamp(0, 20);
+
+  score -= (fumbleCount * 3).clamp(0, 15);
 
   const idealMin = 110.0, idealMax = 160.0;
   if (wordsPerMinute < idealMin) {
