@@ -37,6 +37,25 @@ class SessionRecord {
     this.trackLabel,
   });
 
+  SessionRecord copyWith({int? id}) {
+    return SessionRecord(
+      id: id ?? this.id,
+      createdAt: createdAt,
+      promptText: promptText,
+      transcript: transcript,
+      wordCount: wordCount,
+      durationSeconds: durationSeconds,
+      wordsPerMinute: wordsPerMinute,
+      fillerCount: fillerCount,
+      fillerBreakdown: fillerBreakdown,
+      clutchWordCount: clutchWordCount,
+      longPauseCount: longPauseCount,
+      score: score,
+      fumbleCount: fumbleCount,
+      trackLabel: trackLabel,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,

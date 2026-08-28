@@ -6,7 +6,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/design_tokens.dart';
 import '../../data/tracks_catalog.dart';
 import '../../data/tracks_repository.dart';
-import '../record/record_screen.dart';
+import '../warmup_flow/prep_start_screen.dart';
+import '../warmup_flow/warmup_flow_context.dart';
 import 'all_tracks_screen.dart';
 
 class GoalsScreen extends StatefulWidget {
@@ -41,7 +42,13 @@ class _GoalsScreenState extends State<GoalsScreen> {
     final prompt = track.prompts[_random.nextInt(track.prompts.length)];
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => RecordScreen(promptText: prompt, trackLabel: track.trackLabel),
+        builder: (_) => PrepStartScreen(
+          flowContext: WarmupFlowContext(
+            trackLabel: track.trackLabel,
+            promptPool: track.prompts,
+            promptText: prompt,
+          ),
+        ),
       ),
     );
   }

@@ -9,7 +9,7 @@ import '../../data/models/session_record.dart';
 import '../../data/repositories/session_repository.dart';
 import '../../data/weekly_stats.dart';
 import '../goals/frameworks_screen.dart';
-import '../record/record_screen.dart';
+import '../warmup_flow/topic_shuffle_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final ValueChanged<int>? onNavigateToTab;
@@ -48,7 +48,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _startImpromptu() async {
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => RecordScreen(promptText: randomPrompt(), trackLabel: 'IMPROMPTU')),
+      MaterialPageRoute(
+        builder: (_) => const TopicShuffleScreen(trackLabel: 'IMPROMPTU', promptPool: dailyPrompts),
+      ),
     );
     _load();
   }
