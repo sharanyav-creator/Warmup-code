@@ -25,7 +25,7 @@ class _TopicShuffleScreenState extends State<TopicShuffleScreen> {
   }
 
   Future<void> _proceed() async {
-    await Future.delayed(const Duration(milliseconds: 2000));
+    await Future.delayed(WarmMascot.shuffleSequenceDuration);
     if (!mounted) return;
     final prompt = widget.promptPool[Random().nextInt(widget.promptPool.length)];
     final flowContext = WarmupFlowContext(

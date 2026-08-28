@@ -6,9 +6,28 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 enum MascotMode { idle, shuffling }
 
+class _MascotStep {
+  final String frame;
+  final Duration hold;
+
+  const _MascotStep(this.frame, this.hold);
+}
+
+// The chits build up out of the bowl gradually, pause on a "thinking"
+// beat, spill up again, then land on a triumphant "found it" exclaim.
+const _shuffleSequence = [
+  _MascotStep('warm_idle.svg', Duration(milliseconds: 450)),
+  _MascotStep('warm_chits_peek.svg', Duration(milliseconds: 550)),
+  _MascotStep('warm_chits_rise.svg', Duration(milliseconds: 550)),
+  _MascotStep('warm_chits_spill.svg', Duration(milliseconds: 600)),
+  _MascotStep('warm_question.svg', Duration(milliseconds: 650)),
+  _MascotStep('warm_chits_spill.svg', Duration(milliseconds: 450)),
+  _MascotStep('warm_exclaim.svg', Duration(milliseconds: 700)),
+];
+
 /// Warm, the app's bowl-of-topics mascot. Blinks occasionally when idle,
-/// cycles through a "digging for a topic" animation while shuffling, and
-/// gives a happy bounce + exclaim when tapped.
+/// plays a slow "chits rising out of the bowl" sequence while shuffling,
+/// and gives a happy bounce + exclaim when tapped.
 class WarmMascot extends StatefulWidget {
   final MascotMode mode;
   final double width;
@@ -25,19 +44,26 @@ class WarmMascot extends StatefulWidget {
     this.interactive = true,
   });
 
+  /// Total time the shuffling sequence takes for one full pass, for callers
+  /// that want to time a transition to land right as it completes.
+  static Duration get shuffleSequenceDuration =>
+      _shuffleSequence.fold(Duration.zero, (sum, step) => sum + step.hold);
+
   @override
   State<WarmMascot> createState() => _WarmMascotState();
 }
 
 class _WarmMascotState extends State<WarmMascot> with SingleTickerProviderStateMixin {
-  static const _shuffleFrames = [
-    'warm_chits.svg',
-    'warm_question.svg',
-    'warm_chits.svg',
-    'warm_exclaim.svg',
-  ];
-  static const _idleAspect = 112 / 142;
-  static const _tallAspect = 127 / 142;
+  static const Map<String, double> _aspectRatios = {
+    'warm_idle.svg': 112 / 142,
+    'warm_blink_a.svg': 112 / 142,
+    'warm_blink_b.svg': 112 / 142,
+    'warm_chits_peek.svg': 118 / 146,
+    'warm_chits_rise.svg': 133 / 146,
+    'warm_chits_spill.svg': 157 / 146,
+    'warm_question.svg': 134 / 142,
+    'warm_exclaim.svg': 127 / 142,
+  };
 
   final Random _random = Random();
   Timer? _timer;
@@ -79,18 +105,25 @@ class _WarmMascotState extends State<WarmMascot> with SingleTickerProviderStateM
 
   void _restartLoop() {
     if (widget.mode == MascotMode.shuffling) {
-      setState(() => _frame = _shuffleFrames[0]);
-      _timer = Timer.periodic(const Duration(milliseconds: 420), (_) {
-        if (!mounted) return;
-        setState(() {
-          _shuffleIndex = (_shuffleIndex + 1) % _shuffleFrames.length;
-          _frame = _shuffleFrames[_shuffleIndex];
-        });
-      });
+      _shuffleIndex = 0;
+      setState(() => _frame = _shuffleSequence[0].frame);
+      _scheduleNextShuffleStep();
     } else {
       setState(() => _frame = 'warm_idle.svg');
       _scheduleBlink();
     }
+  }
+
+  void _scheduleNextShuffleStep() {
+    final step = _shuffleSequence[_shuffleIndex];
+    _timer = Timer(step.hold, () {
+      if (!mounted) return;
+      setState(() {
+        _shuffleIndex = (_shuffleIndex + 1) % _shuffleSequence.length;
+        _frame = _shuffleSequence[_shuffleIndex].frame;
+      });
+      _scheduleNextShuffleStep();
+    });
   }
 
   void _scheduleBlink() {
@@ -117,14 +150,17 @@ class _WarmMascotState extends State<WarmMascot> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    final aspect = (_frame == 'warm_exclaim.svg' || _frame == 'warm_question.svg') ? _tallAspect : _idleAspect;
+    final aspect = _aspectRatios[_frame] ?? (112 / 142);
 
     final animatedIcon = AnimatedBuilder(
       animation: _tapScale,
       builder: (context, child) => Transform.scale(scale: _tapScale.value, child: child),
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 160),
-        transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+        duration: const Duration(milliseconds: 320),
+        transitionBuilder: (child, animation) => FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(scale: Tween(begin: 0.94, end: 1.0).animate(animation), child: child),
+        ),
         child: SvgPicture.asset(
           'assets/mascot/$_frame',
           key: ValueKey(_frame),
