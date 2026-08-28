@@ -180,7 +180,9 @@ class _ThisWeekCard extends StatelessWidget {
                   child: Container(
                     height: 26,
                     decoration: BoxDecoration(
-                      color: stats.dayFilled[i] ? OnboardingColors.weekBlockFilled : OnboardingColors.weekBlockEmpty,
+                      color: i < stats.sessionsCount
+                          ? OnboardingColors.weekBlockFilled
+                          : OnboardingColors.weekBlockEmpty,
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),

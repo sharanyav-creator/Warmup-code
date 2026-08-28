@@ -1,14 +1,12 @@
 import 'models/session_record.dart';
 
 class WeeklyStats {
-  final List<bool> dayFilled; // oldest to newest, length 7
   final int sessionsCount;
   final double avgPace;
   final double crutchPercent;
   final int fumbles;
 
   const WeeklyStats({
-    required this.dayFilled,
     required this.sessionsCount,
     required this.avgPace,
     required this.crutchPercent,
@@ -30,8 +28,6 @@ WeeklyStats computeWeeklyStats(List<SessionRecord> sessions, {DateTime? now}) {
       .map((s) => DateTime(s.createdAt.year, s.createdAt.month, s.createdAt.day))
       .toSet();
 
-  final dayFilled = weekDays.map(sessionDays.contains).toList();
-
   final avgPace = weekSessions.isEmpty
       ? 0.0
       : weekSessions.map((s) => s.wordsPerMinute).reduce((a, b) => a + b) / weekSessions.length;
@@ -40,10 +36,9 @@ WeeklyStats computeWeeklyStats(List<SessionRecord> sessions, {DateTime? now}) {
   final totalClutch = weekSessions.fold(0, (sum, s) => sum + s.clutchWordCount);
   final crutchPercent = totalWords == 0 ? 0.0 : totalClutch / totalWords * 100;
 
-  final fumbles = weekSessions.fold(0, (sum, s) => sum + s.longPauseCount);
+  final fumbles = weekSessions.fold(0, (sum, s) => sum + s.fumbleCount);
 
   return WeeklyStats(
-    dayFilled: dayFilled,
     sessionsCount: sessionDays.length,
     avgPace: avgPace,
     crutchPercent: crutchPercent,
