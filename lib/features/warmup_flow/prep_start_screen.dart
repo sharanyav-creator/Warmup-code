@@ -24,6 +24,11 @@ class _PrepStartScreenState extends State<PrepStartScreen> {
   late WarmupFlowContext _flowContext;
   bool _skipPrep = false;
 
+  // Guards against the initial async load resolving *after* the user has
+  // already toggled the switch, which would otherwise silently overwrite
+  // their choice with the stale on-disk value right before they tap Continue.
+  bool _userHasSetToggle = false;
+
   @override
   void initState() {
     super.initState();
@@ -33,12 +38,15 @@ class _PrepStartScreenState extends State<PrepStartScreen> {
 
   Future<void> _loadSkipPrep() async {
     final skip = await _prepPreferences.getSkipPrep();
-    if (!mounted) return;
+    if (!mounted || _userHasSetToggle) return;
     setState(() => _skipPrep = skip);
   }
 
   void _onSkipPrepChanged(bool value) {
-    setState(() => _skipPrep = value);
+    setState(() {
+      _skipPrep = value;
+      _userHasSetToggle = true;
+    });
     _prepPreferences.setSkipPrep(value);
   }
 
