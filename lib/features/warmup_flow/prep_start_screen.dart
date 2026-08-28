@@ -52,7 +52,17 @@ class _PrepStartScreenState extends State<PrepStartScreen> {
           child: Column(
             children: [
               const SizedBox(height: 16),
-              Text(_flowContext.headerLabel, style: OnboardingText.eyebrow()),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  InkWell(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: const Icon(Icons.arrow_back, size: 24, color: Colors.black),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(_flowContext.headerLabel, style: OnboardingText.eyebrow()),
+                ],
+              ),
               const SizedBox(height: 40),
               Text(
                 '"${_flowContext.promptText}"',

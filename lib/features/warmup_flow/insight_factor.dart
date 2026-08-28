@@ -47,14 +47,29 @@ extension WarmupFactorX on WarmupFactor {
     }
   }
 
+  /// Singular unit noun used in stat labels and change badges, e.g. "word".
+  String get unit {
+    switch (this) {
+      case WarmupFactor.fillerWords:
+        return 'word';
+      case WarmupFactor.pace:
+        return 'wpm';
+      case WarmupFactor.longPauses:
+        return 'pause';
+      case WarmupFactor.fumbles:
+        return 'time';
+    }
+  }
+
   String valueLabel(SessionRecord s) {
     if (this == WarmupFactor.pace) return '${s.wordsPerMinute.round()} wpm';
-    return '${currentCount(s)}';
+    final count = currentCount(s);
+    return '$count ${count == 1 ? unit : '${unit}s'}';
   }
 
   ChangeBadge? badge(SessionRecord s, SessionRecord? previous) {
     if (this == WarmupFactor.pace) return paceBadge(s.wordsPerMinute);
-    return percentChange(currentCount(s), previousCount(previous));
+    return countDiffBadge(currentCount(s), previousCount(previous), unit);
   }
 
   /// Bar fraction: proportion of "current" against current+previous, so the
@@ -131,9 +146,7 @@ class FactorBarCard extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 badge.label.toUpperCase(),
-                style: OnboardingText.buttonLabel(
-                  color: badge.isGood ? const Color(0xFF5DB676) : const Color(0xFFD90000),
-                ).copyWith(fontSize: 10),
+                style: OnboardingText.buttonLabel(color: const Color(0xFFBBBBBB)).copyWith(fontSize: 10),
               ),
             ],
           ],

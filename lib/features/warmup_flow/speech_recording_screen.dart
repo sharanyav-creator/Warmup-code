@@ -120,31 +120,40 @@ class _SpeechRecordingScreenState extends State<SpeechRecordingScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              const SizedBox(height: 16),
-              Text(widget.flowContext.headerLabel, style: OnboardingText.eyebrow()),
-              const SizedBox(height: 40),
-              Text(
-                '"${widget.flowContext.promptText}"',
-                textAlign: TextAlign.center,
-                style: OnboardingText.headline(color: Colors.black, fontSize: 20),
-              ),
-              const Spacer(flex: 3),
-              Text(
-                '00:${_secondsRemaining.toString().padLeft(2, '0')}',
-                style: OnboardingText.headline(color: Colors.black, fontSize: 36),
-              ),
-              const SizedBox(height: 32),
-              SvgPicture.asset('assets/main/warmup_waveform.svg', height: 81),
-              const Spacer(flex: 4),
-              Text(
-                "We'll wrap things up when the timer ends.",
-                textAlign: TextAlign.center,
-                style: OnboardingText.body(color: OnboardingColors.creamSubtext).copyWith(fontSize: 12),
-              ),
-              const SizedBox(height: 16),
-            ],
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 16),
+                Text(
+                  widget.flowContext.headerLabel,
+                  textAlign: TextAlign.center,
+                  style: OnboardingText.eyebrow(),
+                ),
+                const SizedBox(height: 40),
+                Text(
+                  '"${widget.flowContext.promptText}"',
+                  textAlign: TextAlign.center,
+                  style: OnboardingText.headline(color: Colors.black, fontSize: 20),
+                ),
+                const Spacer(flex: 3),
+                Text(
+                  '00:${_secondsRemaining.toString().padLeft(2, '0')}',
+                  textAlign: TextAlign.center,
+                  style: OnboardingText.headline(color: Colors.black, fontSize: 36),
+                ),
+                const SizedBox(height: 32),
+                SvgPicture.asset('assets/main/warmup_waveform.svg', height: 81),
+                const Spacer(flex: 4),
+                Text(
+                  "We'll wrap things up when the timer ends.",
+                  textAlign: TextAlign.center,
+                  style: OnboardingText.body(color: OnboardingColors.creamSubtext).copyWith(fontSize: 12),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
       ),

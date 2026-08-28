@@ -58,11 +58,15 @@ class _PrepCountdownScreenState extends State<PrepCountdownScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 16),
               Text(
                 _ready ? widget.flowContext.headerLabel : '${widget.flowContext.headerLabel} PREP',
+                textAlign: TextAlign.center,
                 style: OnboardingText.eyebrow(),
               ),
               const SizedBox(height: 40),
@@ -74,6 +78,7 @@ class _PrepCountdownScreenState extends State<PrepCountdownScreen> {
               const Spacer(flex: 3),
               Text(
                 '00:${_secondsRemaining.toString().padLeft(2, '0')}',
+                textAlign: TextAlign.center,
                 style: OnboardingText.headline(color: Colors.black, fontSize: 36),
               ),
               const SizedBox(height: 32),
@@ -113,6 +118,7 @@ class _PrepCountdownScreenState extends State<PrepCountdownScreen> {
               ),
               const SizedBox(height: 16),
             ],
+            ),
           ),
         ),
       ),

@@ -11,7 +11,12 @@ final RegExp _tokenPattern = RegExp(r"[A-Za-z0-9']+|[^A-Za-z0-9']+");
 /// Builds highlighted spans for a transcript: filler words get an orange
 /// background, back-to-back word repeats (fumbles/stutters) get a red
 /// dashed underline. Mirrors the matching rules in analysis_engine.dart.
-List<InlineSpan> buildTranscriptSpans(String transcript, {required TextStyle baseStyle}) {
+List<InlineSpan> buildTranscriptSpans(
+  String transcript, {
+  required TextStyle baseStyle,
+  bool highlightFillers = true,
+  bool highlightFumbles = true,
+}) {
   final rawTokens = _tokenPattern.allMatches(transcript).map((m) => m.group(0)!).toList();
 
   final wordIndices = <int>[];
@@ -56,8 +61,8 @@ List<InlineSpan> buildTranscriptSpans(String transcript, {required TextStyle bas
   var wordPos = 0;
   for (var i = 0; i < rawTokens.length; i++) {
     if (wordPos < wordIndices.length && wordIndices[wordPos] == i) {
-      final filler = isFiller[wordPos];
-      final fumble = isFumble[wordPos];
+      final filler = isFiller[wordPos] && highlightFillers;
+      final fumble = isFumble[wordPos] && highlightFumbles;
       spans.add(TextSpan(
         text: rawTokens[i],
         style: baseStyle.copyWith(

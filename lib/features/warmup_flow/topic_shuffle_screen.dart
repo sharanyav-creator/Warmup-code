@@ -43,25 +43,37 @@ class _TopicShuffleScreenState extends State<TopicShuffleScreen> {
     return Scaffold(
       backgroundColor: OnboardingColors.creamBackground,
       body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
-            Text('${widget.trackLabel} WARMUP', style: OnboardingText.eyebrow()),
-            const Spacer(flex: 3),
-            Text(
-              'Warm is shuffling topics',
-              textAlign: TextAlign.center,
-              style: OnboardingText.headline(color: Colors.black, fontSize: 20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 16),
+              Text(
+                '${widget.trackLabel} WARMUP',
+                textAlign: TextAlign.center,
+                style: OnboardingText.eyebrow(),
+              ),
+              const Spacer(flex: 3),
+              Text(
+                'Warm is shuffling topics',
+                textAlign: TextAlign.center,
+                style: OnboardingText.headline(color: Colors.black, fontSize: 20),
+              ),
+              const Spacer(flex: 2),
+              const WarmMascot(mode: MascotMode.shuffling, width: 132),
+              const Spacer(flex: 3),
+              Text(
+                'This will take a few seconds...',
+                textAlign: TextAlign.center,
+                style: OnboardingText.body(color: OnboardingColors.creamSubtext),
+              ),
+              const Spacer(flex: 6),
+            ],
             ),
-            const Spacer(flex: 2),
-            const WarmMascot(mode: MascotMode.shuffling, width: 132),
-            const Spacer(flex: 3),
-            Text(
-              'This will take a few seconds...',
-              style: OnboardingText.body(color: OnboardingColors.creamSubtext),
-            ),
-            const Spacer(flex: 6),
-          ],
+          ),
         ),
       ),
     );

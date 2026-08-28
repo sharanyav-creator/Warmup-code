@@ -38,28 +38,37 @@ class _TranscribingScreenState extends State<TranscribingScreen> {
     return Scaffold(
       backgroundColor: OnboardingColors.creamBackground,
       body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
-            Text('WARMUP TRANSCRIBING', style: OnboardingText.eyebrow()),
-            const Spacer(flex: 3),
-            SvgPicture.asset('assets/main/warmup_waveform.svg', height: 81),
-            const Spacer(flex: 3),
-            Text(
-              'Listening back closely...',
-              style: OnboardingText.headline(color: Colors.black, fontSize: 20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 16),
+                Text(
+                  'WARMUP TRANSCRIBING',
+                  textAlign: TextAlign.center,
+                  style: OnboardingText.eyebrow(),
+                ),
+                const Spacer(flex: 3),
+                SvgPicture.asset('assets/main/transcribing_waveform.svg', height: 81),
+                const Spacer(flex: 3),
+                Text(
+                  'Listening back closely...',
+                  textAlign: TextAlign.center,
+                  style: OnboardingText.headline(color: Colors.black, fontSize: 20),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Almost there. \nYour transcript is coming together.',
+                  textAlign: TextAlign.center,
+                  style: OnboardingText.body(color: OnboardingColors.creamSubtext),
+                ),
+                const Spacer(flex: 6),
+              ],
             ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                'Almost there. \nYour transcript is coming together.',
-                textAlign: TextAlign.center,
-                style: OnboardingText.body(color: OnboardingColors.creamSubtext),
-              ),
-            ),
-            const Spacer(flex: 6),
-          ],
+          ),
         ),
       ),
     );

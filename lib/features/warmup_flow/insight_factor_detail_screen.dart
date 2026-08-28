@@ -67,7 +67,7 @@ class InsightFactorDetailScreen extends StatelessWidget {
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: OnboardingColors.creamBackground,
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: session.transcript.isEmpty
@@ -81,6 +81,8 @@ class InsightFactorDetailScreen extends StatelessWidget {
                                     session.transcript,
                                     baseStyle:
                                         OnboardingText.body(color: Colors.black).copyWith(height: 1.6),
+                                    highlightFillers: factor == WarmupFactor.fillerWords,
+                                    highlightFumbles: factor == WarmupFactor.fumbles,
                                   ),
                                 ),
                               ),

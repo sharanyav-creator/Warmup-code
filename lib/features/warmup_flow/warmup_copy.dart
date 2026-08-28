@@ -2,15 +2,17 @@ import '../../data/models/session_record.dart';
 
 typedef ChangeBadge = ({String label, bool isGood});
 
-/// Compares a count-style metric (lower is better) to the previous session.
-ChangeBadge? percentChange(int current, int? previous) {
-  if (previous == null || previous == 0) return null;
+/// Compares a count-style metric (lower is better) to the previous session,
+/// e.g. "2 words lesser than Last Warmup".
+ChangeBadge? countDiffBadge(int current, int? previous, String unit) {
+  if (previous == null) return null;
   final diff = previous - current;
-  final pct = (diff.abs() / previous * 100).round();
-  if (pct == 0) return null;
+  if (diff == 0) return null;
   final decreased = diff > 0;
+  final amount = diff.abs();
+  final word = amount == 1 ? unit : '${unit}s';
   return (
-    label: decreased ? '$pct% lesser than last Warmup' : '$pct% more than last time',
+    label: decreased ? '$amount $word lesser than Last Warmup' : '$amount $word more than Last Warmup',
     isGood: decreased,
   );
 }
