@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -74,7 +75,7 @@ class _DayInsightsScreenState extends State<DayInsightsScreen> {
                 children: [
                   InkWell(
                     onTap: () => Navigator.of(context).pop(),
-                    child: const Icon(Icons.arrow_back, size: 24),
+                    child: SvgPicture.asset('assets/main/insights_back_chevron.svg', width: 24, height: 24),
                   ),
                   const SizedBox(width: 10),
                   Text('Day Insights', style: OnboardingText.headline(color: Colors.black, fontSize: 18)),
@@ -121,7 +122,10 @@ class _DateNav extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          InkWell(onTap: onPrev, child: const Icon(Icons.chevron_left, color: Colors.white)),
+          InkWell(
+            onTap: onPrev,
+            child: SvgPicture.asset('assets/main/date_nav_chevron.svg', width: 24, height: 24),
+          ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
@@ -130,7 +134,13 @@ class _DateNav extends StatelessWidget {
               style: OnboardingText.buttonLabel(color: Colors.black).copyWith(fontSize: 12),
             ),
           ),
-          InkWell(onTap: onNext, child: const Icon(Icons.chevron_right, color: Colors.white)),
+          InkWell(
+            onTap: onNext,
+            child: Transform.rotate(
+              angle: 3.14159,
+              child: SvgPicture.asset('assets/main/date_nav_chevron.svg', width: 24, height: 24),
+            ),
+          ),
         ],
       ),
     );

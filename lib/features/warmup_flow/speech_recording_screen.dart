@@ -27,11 +27,26 @@ class _SpeechRecordingScreenState extends State<SpeechRecordingScreen> {
   final SpeechToText _speech = SpeechToText();
   final List<SpeechChunk> _chunks = [];
 
-  String _transcript = '';
+  // The Android/iOS speech recognizer only stays alive for a single bounded
+  // "listen session" — it can end well before our 60s target (silence,
+  // OS-side timeouts) without ever calling onError. onStatus is used to
+  // detect that and immediately start a fresh session so we keep capturing
+  // for the whole target duration instead of silently going deaf partway
+  // through. Each session's recognizedWords resets to empty, so finalized
+  // text is accumulated separately from the current session's live partial.
+  String _committedTranscript = '';
+  String _currentPartial = '';
+  String get _transcript => [
+        _committedTranscript,
+        _currentPartial,
+      ].where((s) => s.isNotEmpty).join(' ');
+
   DateTime? _startTime;
   Timer? _timer;
   int _secondsRemaining = targetSessionLength.inSeconds;
   bool _finished = false;
+  bool _restartPending = false;
+  String? _initError;
 
   @override
   void initState() {
@@ -42,22 +57,29 @@ class _SpeechRecordingScreenState extends State<SpeechRecordingScreen> {
   Future<void> _start() async {
     final status = await Permission.microphone.request();
     if (!status.isGranted || !mounted) return;
-    final available = await _speech.initialize();
-    if (!available || !mounted) return;
+
+    final available = await _speech.initialize(
+      debugLogging: true,
+      // Heavily customized Android builds (MIUI, etc.) can fail to resolve
+      // the default speech recognition intent, which silently breaks audio
+      // routing into the recognizer. This forces the plugin to look it up
+      // explicitly instead of relying on the platform default.
+      options: [SpeechToText.androidIntentLookup],
+      onError: (error) {
+        debugPrint('STT error: ${error.errorMsg} (permanent: ${error.permanent})');
+      },
+      onStatus: (status) {
+        debugPrint('STT status: $status');
+        _scheduleRestartIfDone(status);
+      },
+    );
+    if (!available || !mounted) {
+      setState(() => _initError = 'Speech recognition unavailable on this device.');
+      return;
+    }
 
     _startTime = DateTime.now();
-    _speech.listen(
-      onResult: (result) {
-        setState(() => _transcript = result.recognizedWords);
-        _chunks.add(SpeechChunk(text: result.recognizedWords, timestamp: DateTime.now()));
-      },
-      listenOptions: SpeechListenOptions(
-        listenMode: ListenMode.dictation,
-        partialResults: true,
-        listenFor: targetSessionLength,
-        pauseFor: targetSessionLength,
-      ),
-    );
+    _listen();
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_secondsRemaining <= 1) {
@@ -68,12 +90,83 @@ class _SpeechRecordingScreenState extends State<SpeechRecordingScreen> {
     });
   }
 
+  // Real device recognizers (esp. OEM ones) commonly end a listen session
+  // after just a few words, even with pauseFor/listenFor set generously —
+  // and calling listen() again immediately, from inside the status callback,
+  // is unreliable on hardware because the platform recognizer hasn't
+  // finished tearing down yet (the plugin itself waits ~50ms before
+  // releasing the native recognizer). A short delay plus a re-entrancy guard
+  // makes the restart land cleanly instead of silently failing. Triggered
+  // from both the final result and the "done" status — whichever arrives
+  // first — to close the gap where the next word gets missed.
+  void _scheduleRestart() {
+    if (_finished || _restartPending) return;
+    _restartPending = true;
+    Future.delayed(const Duration(milliseconds: 150), () {
+      _restartPending = false;
+      if (!_finished && mounted) _listen();
+    });
+  }
+
+  void _scheduleRestartIfDone(String status) {
+    if (status == SpeechToText.doneStatus) _scheduleRestart();
+  }
+
+  Future<void> _listen() async {
+    if (_finished) return;
+    _currentPartial = '';
+    try {
+      await _speech.listen(
+        onResult: (result) {
+          setState(() {
+            if (result.finalResult) {
+              _committedTranscript = _transcript;
+              _currentPartial = '';
+              _scheduleRestart();
+            } else {
+              _currentPartial = result.recognizedWords;
+            }
+          });
+          _chunks.add(SpeechChunk(text: result.recognizedWords, timestamp: DateTime.now()));
+        },
+        // Deliberately short, not the full 60s target: Android's recognizer
+        // isn't built to hold one unbroken utterance that long — its result
+        // buffer only remembers the most recent portion once a session runs
+        // too long, silently truncating the transcript to the tail end. Each
+        // session is kept short so it naturally finalizes on normal speech
+        // pauses (or the listenFor cap if the user never pauses), and the
+        // restart chain in onResult/onStatus stitches the short segments
+        // back into one transcript for the full target duration.
+        listenOptions: SpeechListenOptions(
+          listenMode: ListenMode.dictation,
+          partialResults: true,
+          // Hybrid recognition (on-device + network when available) rather
+          // than forcing offline-only: noticeably more accurate, at the cost
+          // of audio sometimes being sent to Google's recognizer instead of
+          // staying fully on-device.
+          onDevice: false,
+          listenFor: const Duration(seconds: 20),
+          pauseFor: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      debugPrint('STT listen() failed: $e');
+      // Give the platform side a moment to settle, then try again rather
+      // than leaving the rest of the session silently uncaptured.
+      _scheduleRestart();
+    }
+  }
+
   Future<void> _finish() async {
     _timer?.cancel();
     if (_finished) return;
     _finished = true;
     final sessionRepository = context.read<SessionRepository>();
     await _speech.stop();
+    // stop() resolves before the last session's final result callback
+    // actually arrives over the platform channel — without this, the words
+    // spoken right at the end of the session get dropped from the transcript.
+    await Future.delayed(const Duration(milliseconds: 400));
 
     final duration = _startTime == null ? Duration.zero : DateTime.now().difference(_startTime!);
     final result = analyzeSession(transcript: _transcript, chunks: _chunks, sessionDuration: duration);
@@ -147,9 +240,11 @@ class _SpeechRecordingScreenState extends State<SpeechRecordingScreen> {
                 SvgPicture.asset('assets/main/warmup_waveform.svg', height: 81),
                 const Spacer(flex: 4),
                 Text(
-                  "We'll wrap things up when the timer ends.",
+                  _initError ?? "We'll wrap things up when the timer ends.",
                   textAlign: TextAlign.center,
-                  style: OnboardingText.body(color: OnboardingColors.creamSubtext).copyWith(fontSize: 12),
+                  style: OnboardingText.body(
+                    color: _initError != null ? OnboardingColors.burgundy : OnboardingColors.creamSubtext,
+                  ).copyWith(fontSize: 12),
                 ),
                 const SizedBox(height: 16),
               ],

@@ -90,7 +90,7 @@ class _PrepStartScreenState extends State<PrepStartScreen> {
                   children: [
                     InkWell(
                       onTap: () => Navigator.of(context).pop(),
-                      child: const Icon(Icons.arrow_back, size: 24, color: Colors.black),
+                      child: SvgPicture.asset('assets/main/insights_back_chevron.svg', width: 24, height: 24),
                     ),
                     const SizedBox(width: 10),
                     Text(_flowContext.headerLabel, textAlign: TextAlign.center, style: OnboardingText.eyebrow()),

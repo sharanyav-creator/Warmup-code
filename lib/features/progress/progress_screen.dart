@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -276,7 +277,7 @@ class _TrendsTab extends StatelessWidget {
                       children: [
                         Text('Weekly', style: OnboardingText.buttonLabel(color: Colors.black).copyWith(fontSize: 12)),
                         const SizedBox(width: 4),
-                        const Icon(Icons.keyboard_arrow_down, size: 16),
+                        SvgPicture.asset('assets/main/dropdown_chevron.svg', width: 16, height: 16),
                       ],
                     ),
                   ),

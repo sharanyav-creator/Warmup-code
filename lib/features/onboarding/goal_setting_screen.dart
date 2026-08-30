@@ -7,16 +7,48 @@ import '../../core/design_tokens.dart';
 class _GoalOption {
   final String title;
   final String subtitle;
+  final String iconAsset;
+  final String iconAssetSelected;
 
-  const _GoalOption({required this.title, required this.subtitle});
+  const _GoalOption({
+    required this.title,
+    required this.subtitle,
+    required this.iconAsset,
+    required this.iconAssetSelected,
+  });
 }
 
 const List<_GoalOption> _goalOptions = [
-  _GoalOption(title: 'Public Speaking', subtitle: 'Presentations, talks, and speeches'),
-  _GoalOption(title: 'Interviews', subtitle: 'Behavioral and situational questions'),
-  _GoalOption(title: 'Everyday conversation', subtitle: 'Small talk that feels easy'),
-  _GoalOption(title: 'Storytelling', subtitle: 'Turn moments into memorable stories'),
-  _GoalOption(title: 'Meetings & work', subtitle: 'Speak up clearly in the room'),
+  _GoalOption(
+    title: 'Public Speaking',
+    subtitle: 'Presentations, talks, and speeches',
+    iconAsset: 'assets/onboarding/goal_public_speaking.svg',
+    iconAssetSelected: 'assets/onboarding/goal_public_speaking_selected.svg',
+  ),
+  _GoalOption(
+    title: 'Interviews',
+    subtitle: 'Behavioral and situational questions',
+    iconAsset: 'assets/onboarding/goal_interviews.svg',
+    iconAssetSelected: 'assets/onboarding/goal_interviews_selected.svg',
+  ),
+  _GoalOption(
+    title: 'Everyday conversation',
+    subtitle: 'Small talk that feels easy',
+    iconAsset: 'assets/onboarding/goal_everyday_conversation.svg',
+    iconAssetSelected: 'assets/onboarding/goal_everyday_conversation_selected.svg',
+  ),
+  _GoalOption(
+    title: 'Storytelling',
+    subtitle: 'Turn moments into memorable stories',
+    iconAsset: 'assets/onboarding/goal_storytelling.svg',
+    iconAssetSelected: 'assets/onboarding/goal_storytelling_selected.svg',
+  ),
+  _GoalOption(
+    title: 'Meetings & work',
+    subtitle: 'Speak up clearly in the room',
+    iconAsset: 'assets/onboarding/goal_meetings_work.svg',
+    iconAssetSelected: 'assets/onboarding/goal_meetings_work_selected.svg',
+  ),
 ];
 
 class GoalSettingScreen extends StatefulWidget {
@@ -60,6 +92,8 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
                     return _GoalCard(
                       title: option.title,
                       subtitle: option.subtitle,
+                      iconAsset: option.iconAsset,
+                      iconAssetSelected: option.iconAssetSelected,
                       selected: selected,
                       onTap: () => setState(() => _selectedIndex = index),
                     );
@@ -97,12 +131,16 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
 class _GoalCard extends StatelessWidget {
   final String title;
   final String subtitle;
+  final String iconAsset;
+  final String iconAssetSelected;
   final bool selected;
   final VoidCallback onTap;
 
   const _GoalCard({
     required this.title,
     required this.subtitle,
+    required this.iconAsset,
+    required this.iconAssetSelected,
     required this.selected,
     required this.onTap,
   });
@@ -122,7 +160,7 @@ class _GoalCard extends StatelessWidget {
         child: Row(
           children: [
             SvgPicture.asset(
-              selected ? 'assets/onboarding/goal_icon_selected.svg' : 'assets/onboarding/goal_icon.svg',
+              selected ? iconAssetSelected : iconAsset,
               width: 37,
               height: 37,
             ),

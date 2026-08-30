@@ -58,3 +58,9 @@ Future<void> markOnboardingComplete() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setBool(_hasOnboardedKey, true);
 }
+
+/// Call on log out so the next launch starts from onboarding again.
+Future<void> clearOnboarding() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool(_hasOnboardedKey, false);
+}

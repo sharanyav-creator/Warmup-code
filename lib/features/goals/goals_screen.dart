@@ -9,6 +9,7 @@ import '../../data/tracks_repository.dart';
 import '../warmup_flow/prep_start_screen.dart';
 import '../warmup_flow/warmup_flow_context.dart';
 import 'all_tracks_screen.dart';
+import 'remove_track_popup.dart';
 
 class GoalsScreen extends StatefulWidget {
   const GoalsScreen({super.key});
@@ -60,6 +61,17 @@ class _GoalsScreenState extends State<GoalsScreen> {
     _load();
   }
 
+  Future<void> _removeTrack(TrackDef track, Offset position) async {
+    await showRemoveTrackPopup(
+      context,
+      globalPosition: position,
+      onRemove: () async {
+        await _repository.removeTrack(track.id);
+        _load();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,7 +93,11 @@ class _GoalsScreenState extends State<GoalsScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       children: [
                         for (final track in _yourTracks)
-                          _TrackCard(track: track, onPlay: () => _startTrackPractice(track)),
+                          _TrackCard(
+                            track: track,
+                            onPlay: () => _startTrackPractice(track),
+                            onLongPressStart: (details) => _removeTrack(track, details.globalPosition),
+                          ),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
@@ -95,6 +111,12 @@ class _GoalsScreenState extends State<GoalsScreen> {
                             onPressed: _exploreMoreTracks,
                             child: Text('Explore more Tracks', style: OnboardingText.buttonLabel(color: Colors.white)),
                           ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Tap & Hold on a track to remove it.',
+                          textAlign: TextAlign.center,
+                          style: OnboardingText.body(color: OnboardingColors.creamSubtext).copyWith(fontSize: 12),
                         ),
                         const SizedBox(height: 24),
                       ],
@@ -110,12 +132,15 @@ class _GoalsScreenState extends State<GoalsScreen> {
 class _TrackCard extends StatelessWidget {
   final TrackDef track;
   final VoidCallback onPlay;
+  final GestureLongPressStartCallback onLongPressStart;
 
-  const _TrackCard({required this.track, required this.onPlay});
+  const _TrackCard({required this.track, required this.onPlay, required this.onLongPressStart});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onLongPressStart: onLongPressStart,
+      child: Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -156,6 +181,7 @@ class _TrackCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

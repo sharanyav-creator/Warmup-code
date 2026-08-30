@@ -7,6 +7,7 @@ import '../../core/design_tokens.dart';
 import '../../data/daily_prompts.dart';
 import '../../data/models/session_record.dart';
 import '../../data/repositories/session_repository.dart';
+import '../../data/user_profile.dart';
 import '../../data/weekly_stats.dart';
 import '../goals/frameworks_screen.dart';
 import '../mascot/warm_mascot.dart';
@@ -22,7 +23,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _userProfile = UserProfile();
   List<SessionRecord> _sessions = [];
+  String _displayName = '';
   bool _loading = true;
 
   @override
@@ -33,18 +36,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _load() async {
     final sessions = await context.read<SessionRepository>().getAll();
+    final name = await _userProfile.getDisplayName();
     if (!mounted) return;
     setState(() {
       _sessions = sessions;
+      _displayName = name;
       _loading = false;
     });
   }
 
   String get _greeting {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Morning, Dev!';
-    if (hour < 17) return 'Afternoon, Dev!';
-    return 'Evening, Dev!';
+    if (hour < 12) return 'Morning, $_displayName!';
+    if (hour < 17) return 'Afternoon, $_displayName!';
+    return 'Evening, $_displayName!';
   }
 
   void _startImpromptu() async {

@@ -48,7 +48,7 @@ class MicPermissionScreen extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 'to hear you practice and turn your speech into feedback. '
-                'Nothing is shared, recordings stay private to you.',
+                'Processed securely — your voice is never stored or shared.',
                 textAlign: TextAlign.center,
                 style: OnboardingText.body(color: OnboardingColors.creamSubtext),
               ),

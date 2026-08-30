@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/design_tokens.dart';
 import '../../data/models/session_record.dart';
@@ -35,7 +36,7 @@ class InsightFactorDetailScreen extends StatelessWidget {
                 children: [
                   InkWell(
                     onTap: () => Navigator.of(context).pop(),
-                    child: const Icon(Icons.arrow_back, size: 24),
+                    child: SvgPicture.asset('assets/main/insights_back_chevron.svg', width: 24, height: 24),
                   ),
                   const SizedBox(width: 10),
                   Text('WARMUP INSIGHTS', style: OnboardingText.eyebrow()),

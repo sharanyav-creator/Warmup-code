@@ -17,4 +17,10 @@ class TracksRepository {
     if (current.contains(id)) return;
     await prefs.setStringList(_activeTrackIdsKey, [...current, id]);
   }
+
+  Future<void> removeTrack(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final current = prefs.getStringList(_activeTrackIdsKey) ?? defaultActiveTrackIds;
+    await prefs.setStringList(_activeTrackIdsKey, current.where((trackId) => trackId != id).toList());
+  }
 }
